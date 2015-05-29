@@ -44,7 +44,8 @@
                 nutella.setResourceId(user);
                 if (user.length > 0) {
                     nutella.net.request('analyze','test', function(response) {
-                        alert("Analysis complete. Your sample contains " + response.message.finding);
+                        console.log(response.finding)
+                        alert("Analysis complete. Your sample contains " + response.finding);
                     });
                 } else {
                     alert("Please enter a user");
