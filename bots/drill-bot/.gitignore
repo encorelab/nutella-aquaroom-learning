@@ -1,0 +1,5 @@
+.idea/
+
+node_modules/
+
+bots/drill-bot/data/default/*.json
