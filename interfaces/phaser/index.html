@@ -10,7 +10,18 @@
 	<link href="phaser.css" rel="stylesheet"/>
 </head>
 <body>
-	<!-- Your markup here -->
+	<h2>PHASER</h2>
+	<br />
+	<div>
+		<span>Enter your user: </span>
+		<input id="user"></input>
+	</div>
+	<!-- TODO: switch me to 'get from ibeacon' location determination -->
+	<div>
+		<span>Enter your location: </span>
+		<input id="location"></input>
+	</div>
+	<br />
 	<div>
 		<button id="sample-btn">Take Sample</button>
 	</div>
@@ -30,37 +41,52 @@
 
 	<script type="text/javascript">
 
-	/* ACTUAL REAL CODE */
+	/* NUTELLA INIT STUFF */
 	var query_parameters = NUTELLA.parseURLParameters();
 
 	// Get an instance of nutella.
 	var nutella = NUTELLA.init(query_parameters.broker, query_parameters.app_id, query_parameters.run_id, NUTELLA.parseComponentId());
 
-
-	jQuery('#sample-btn').click(function() {
-		alert('Taking sample: todo');
-	});
-
-	jQuery('#inject-dye-btn').click(function() {
-		jQuery('.dye-color-btn').toggleClass('hidden');
-	});
-
 	nutella.net.subscribe('insert_dye', function(message, from) {
 		console.log(message);
 	},
 	function () {
-		jQuery('.dye-color-btn').click(function() {
-			var msg = {
-				"colour" : jQuery(this).data('colour'),
-				"location" : "C2"
+		// once the we're subscribed to both channels, set up the click listeners
+		// of course, it looks like we won't need to subscribe to these channels anyways
+		jQuery('#inject-dye-btn').click(function() {
+			jQuery('.dye-color-btn').toggleClass('hidden');
+		});
+		jQuery('#sample-btn').click(function() {
+			var user = jQuery('#user').val();
+			nutella.setResourceId(user);
+			if (user.length > 0) {
+				var msg = {
+				"location" : jQuery('#location').val()
+				}
+				nutella.net.publish("drill", JSON.stringify(msg));
+				console.log("Published msg to " + "drill");
+			} else {
+				alert("Please enter a user");
 			}
-			nutella.net.publish("insert_dye", JSON.stringify(msg));
-			console.log("Published msg to " + "insert_dye");
+		});
+		jQuery('.dye-color-btn').click(function() {
+			var user = jQuery('#user').val();
+			nutella.setResourceId(user);
+			if (user.length > 0) {
+				var msg = {
+					"colour" : jQuery(this).data('colour'),
+					"location" : jQuery('#location').val()
+				}
+				nutella.net.publish("insert_dye", JSON.stringify(msg));
+				console.log("Published msg to " + "insert_dye");
+			} else {
+				alert("Please enter a user");
+			}
 		});
 	});
 
 
-	/* NUTELLA SAMPLE STUFF */
+	/* NUTELLA SAMPLE STUFF - REMEMBER THAT THIS STUFF IS OUT OF DATE */
 
 	// Parse the query parameters
 	// var query_parameters = NUTELLA.parseURLParameters();
