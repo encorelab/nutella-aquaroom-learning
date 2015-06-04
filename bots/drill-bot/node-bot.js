@@ -14,9 +14,12 @@ console.log("Hi, I'm a basic node bot and your code should go here!");
 
 // Some examples to give you ideas...
 // You can do things such as:
-var dyes = nutella.persist.getJsonObjectStore('dyes');
-var drillings = nutella.persist.getJsonObjectStore('drillings');
 
+var store = nutella.persist.getJsonObjectStore('store');
+
+store.load();
+store.dyes = store.dyes || {};
+store.drillings = store.drillings || {};
 
 // 1. Subscribing to a channel
 nutella.net.subscribe('insert_dye', function(message, from) {
@@ -27,13 +30,15 @@ nutella.net.subscribe('insert_dye', function(message, from) {
         var dye = {};
         dye.colour = msg.colour;
         dye.date = new Date();
-        dyes[msg.location] = dye;
+        store.load();
+        store.dyes[msg.location] = dye;
         // Object.keys(msg).forEach(function (key) {
-        //     dyes[key] = msg[key];
+        //     store[key] = msg[key];
         // });
         // console.log ("saving dye");
-        // console.log (dyes);
-        dyes.save();
+        // console.log (store);
+        store.save();
+        console.log("Dye inserted");
     } catch (e) {
         console.error("Message was not JSON: "+e);
     }
@@ -45,13 +50,32 @@ nutella.net.subscribe('drill', function(message, from) {
         try {
             var msg = JSON.parse(message);
             msg.date = new Date();
-            drillings[from.resource_id] = msg;
-            drillings.save();
+            store.load();
+            store.drillings[from.resource_id] = msg;
+            store.save();
+            console.log("drilling saved");
         } catch (e) {
             console.error("Message was not JSON: "+e);
         }
     } else {
         console.error("No resource_id found in from, discarding message: "+message);
+    }
+});
+
+nutella.net.handle_requests('analyze', function(message, from) {
+    console.log("Received analyze request from: "+from.resource_id);
+    // console.log(from.resource_id);
+    store.load();
+    // console.log(store);
+    // console.log(store.drillings[from.resource_id]);
+    // console.log(store.drillings[from.resource_id].location);
+    var finding = store.dyes[store.drillings[from.resource_id].location];
+    if (finding) {
+        console.log("Returning finding: "+finding.colour);
+        return {"finding":finding.colour};
+    } else {
+        console.log("No finding and no preconfig of river or not");
+        return {"finding":"water or earth man"};
     }
 });
 
@@ -80,4 +104,5 @@ nutella.net.subscribe('drill', function(message, from) {
 //     // response = {my:'json'}
 //     return response;
 // });
+
 
